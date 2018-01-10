@@ -20,6 +20,15 @@ private int kills;
 private int deaths;
 private int flagCaps;
 private int teamKills;
+private int teamKilled;
+public int getTeamKilled() {
+	return teamKilled;
+}
+
+public void setTeamKilled(int teamKilled) {
+	this.teamKilled = teamKilled;
+}
+
 private int flagDefends;
 private int flagCapAssists;
 private int flagNeutralizes;

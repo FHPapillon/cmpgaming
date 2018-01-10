@@ -203,7 +203,7 @@ public class LogMapper {
 					break;
 				case (FragalyzerConstants.AttackerVehicle):
 					if (!logValue.equals(FragalyzerConstants.MultiPlayerFreeCamera))
-						kill.setVehicle(logValue);
+						kill.setVehicle(logValue.toLowerCase());
 					else {
 						// System.out.println(kill.getPlayer() + ": " +
 						// lastEnteredVehicleByPlayer.get(kill.getPlayer()));
@@ -211,7 +211,7 @@ public class LogMapper {
 					}
 					break;
 				case (FragalyzerConstants.AttackerWeapon):
-					kill.setWeapon(logValue);
+					kill.setWeapon(logValue.toLowerCase());
 					break;
 				case (FragalyzerConstants.VictimKit):
 					kill.setVictimKit(logValue.toLowerCase());
@@ -223,7 +223,7 @@ public class LogMapper {
 					kill.setVictimTeam(logValue);
 					break;
 				case (FragalyzerConstants.VictimVehicle):
-					kill.setVictimVehicle(logValue);
+					kill.setVictimVehicle(logValue.toLowerCase());
 					break;
 				case (FragalyzerConstants.AttackerPos):
 					kill.setPlayerPosition(getPositionFromLog(logValue));
@@ -423,7 +423,7 @@ public class LogMapper {
 			kill.setKillType(KillType.INF_INF);
 
 		if (attackerIsInf && !victimIsInf){
-			if (!kill.getVictimVehicle().equals("LadderContainer"))
+			if (!kill.getVictimVehicle().equals("laddercontainer"))
 				kill.setKillType(KillType.INF_VEHICLE);
 			else
 				kill.setKillType(KillType.INF_INF);
@@ -433,7 +433,7 @@ public class LogMapper {
 			kill.setKillType(KillType.VEHICLE_INF);
 
 		if (!attackerIsInf && !victimIsInf)
-			if (!kill.getVictimVehicle().equals("LadderContainer"))
+			if (!kill.getVictimVehicle().equals("laddercontainer"))
 				kill.setKillType(KillType.VEHICLE_VEHICLE);
 			else
 				kill.setKillType(KillType.VEHICLE_INF);			
@@ -481,6 +481,7 @@ public class LogMapper {
 		case FragalyzerConstants.waw:
 		case FragalyzerConstants.uw:
 		case FragalyzerConstants.be:
+		case FragalyzerConstants.gcw:
 			return true;
 
 		default:

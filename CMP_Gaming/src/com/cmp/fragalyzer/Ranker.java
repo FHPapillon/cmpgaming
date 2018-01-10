@@ -1,19 +1,19 @@
 
 package com.cmp.fragalyzer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 
 import org.json.simple.JSONArray;
@@ -26,15 +26,12 @@ import com.cmp.fragalyzer.types.PlayerStats;
 import com.cmp.fragalyzer.types.StatScope;
 import com.cmp.fragalyzer.types.VehicleType;
 import com.cmp.fragalyzer.types.WeaponType;
-import com.hp.gagawa.java.elements.A;
 import com.hp.gagawa.java.elements.Body;
-import com.hp.gagawa.java.elements.Div;
 import com.hp.gagawa.java.elements.H1;
 import com.hp.gagawa.java.elements.H2;
 import com.hp.gagawa.java.elements.H4;
 import com.hp.gagawa.java.elements.Head;
 import com.hp.gagawa.java.elements.Html;
-import com.hp.gagawa.java.elements.Img;
 import com.hp.gagawa.java.elements.Table;
 import com.hp.gagawa.java.elements.Td;
 import com.hp.gagawa.java.elements.Text;
@@ -65,6 +62,7 @@ public class Ranker {
 	private String team;
 
 	private HashMap<String, Integer> tkRanking;
+	private HashMap<String, Integer> tkedRanking;
 
 	private Tr tr;
 	private HashMap<String, HashMap<String, Integer>> vehicleNameRanking;
@@ -301,6 +299,58 @@ public class Ranker {
 
 	}
 
+	public static double round(double value, int places) {
+		if (places < 0)
+			throw new IllegalArgumentException();
+
+		long factor = (long) Math.pow(10, places);
+		value = value * factor;
+		long tmp = Math.round(value);
+		return (double) tmp / factor;
+	}
+
+	private void appendToHTLMReportDouble(String map_round, String scope, HashMap<String, Double> ranks) {
+
+		int count = 0;
+		Title title = new Title();
+		title.appendChild(new Text(map_round + " " + getScopeName()));
+		getReport().appendChild(title);
+
+		Body body = new Body();
+
+		Table table = new Table();
+		Tr tr = new Tr();
+		Td td = new Td();
+
+		// H1 h1 = new H1();
+		// h1.appendChild(new Text(scope));
+		// body.appendChild(h1);
+
+		table = new Table();
+
+		H2 h2 = new H2();
+
+		for (Map.Entry<String, Double> entry : MapUtil.sortByValueDesc(ranks).entrySet()) {
+			tr = new Tr();
+			// tr = new Tr();
+			table.appendChild(tr);
+			td = new Td();
+			td.appendChild(new Text(entry.getKey()));
+			tr.appendChild(td);
+			td = new Td();
+			td.appendChild(new Text(round(entry.getValue(), 2)));
+			tr.appendChild(td);
+			count = count + entry.getValue().intValue();
+		}
+
+		h2.appendChild(new Text(map_round + " (" + count + ")"));
+		body.appendChild(h2);
+
+		body.appendChild(table);
+		getReport().appendChild(body);
+
+	}
+
 	private void appendToHTLMReport(String map_round, String scope, HashMap<String, Integer> ranks) {
 
 		int count = 0;
@@ -487,14 +537,41 @@ public class Ranker {
 
 		while (it.hasNext()) {
 			logEntry = it.next();
-			if (!logEntry.getKillType().equals(KillType.SUICIDE) && logEntry.isTeamkill()) {
+			if (!logEntry.getKillType().equals(KillType.SUICIDE) && logEntry.isTeamkill()
+					&& logEntry.getPlayer().equals(stats.getPlayerName())) {
 				tks++;
 			}
 
 		}
 
 		stats.setTeamKills(tks);
+
 		getTkRanking().put(stats.getPlayerName(), new Integer(stats.getTeamKills()));
+
+		return stats;
+	}
+
+	/*
+	 * Per player, count how often he was teamkilled
+	 */
+	private PlayerStats countTeamKilled(PlayerStats stats) {
+		Iterator<LogEntry> it = stats.getEvents().iterator();
+
+		LogEntry logEntry;
+		int tks = 0;
+
+		while (it.hasNext()) {
+			logEntry = it.next();
+			if (!logEntry.getKillType().equals(KillType.SUICIDE) && logEntry.isTeamkill()
+					&& logEntry.getVictim().equals(stats.getPlayerName())) {
+				tks++;
+			}
+
+		}
+
+		stats.setTeamKilled(tks);
+
+		getTkedRanking().put(stats.getPlayerName(), new Integer(stats.getTeamKilled()));
 
 		return stats;
 	}
@@ -655,6 +732,8 @@ public class Ranker {
 								new Integer(weaponNameKillRanking.get(logEntry.getPlayer()).intValue() + 1));
 
 					getWeaponNameRanking().put(logEntry.getWeaponName(), weaponNameKillRanking);
+					if (logEntry.getWeaponName() == null)
+						System.out.println("null" + logEntry.toString());
 					// to here
 
 					break;
@@ -698,6 +777,9 @@ public class Ranker {
 
 			// Count number of TKs
 			playerStats = countTeamKills(playerStats);
+
+			// Count number of being TKed
+			playerStats = countTeamKilled(playerStats);
 
 			// Count number of CP Things
 			playerStats = countCPStuff(playerStats);
@@ -746,6 +828,9 @@ public class Ranker {
 			list.add(event);
 		}
 		obj.put(name, list);
+
+		appendToHTLMReportDouble(name, getScope().name(), ranks);
+
 		return obj.toJSONString();
 	}
 
@@ -772,16 +857,24 @@ public class Ranker {
 			fw.write(dumpRank(FragalyzerConstants.killrankings, getKillRanking()) + ",");
 			fw.write(dumpRank(FragalyzerConstants.deathrankings, getDeathsRanking()) + ",");
 			fw.write(dumpRank(FragalyzerConstants.tkrankings, getTkRanking()) + ",");
-			fw.write(dumpRank(FragalyzerConstants.cpcapassistranking, getCpCapAassistRanking()) + ",");
-			fw.write(dumpRank(FragalyzerConstants.cpcapranking, getCpCapRanking()) + ",");
-			fw.write(dumpRank(FragalyzerConstants.cpdefendranking, getCpDefendRanking()) + ",");
-			fw.write(dumpRank(FragalyzerConstants.cpneutralizeassistranking, getCpNeutralizeAssistRanking()) + ",");
-			fw.write(dumpRank(FragalyzerConstants.cpneutralizeranking, getCpNeutralizeRanking()) + ",");
+			fw.write(dumpRank(FragalyzerConstants.tkedrankings, getTkedRanking()) + ",");
+			// fw.write(dumpRank(FragalyzerConstants.cpcapassistranking,
+			// getCpCapAassistRanking()) + ",");
+			// fw.write(dumpRank(FragalyzerConstants.cpcapranking,
+			// getCpCapRanking()) + ",");
+			// fw.write(dumpRank(FragalyzerConstants.cpdefendranking,
+			// getCpDefendRanking()) + ",");
+			// fw.write(dumpRank(FragalyzerConstants.cpneutralizeassistranking,
+			// getCpNeutralizeAssistRanking()) + ",");
+			// fw.write(dumpRank(FragalyzerConstants.cpneutralizeranking,
+			// getCpNeutralizeRanking()) + ",");
 			fw.write(dumpRankDouble(FragalyzerConstants.kdrranking, getKdrRanking()) + ",");
-			dumpVehicleTypeRank(FragalyzerConstants.vehicletype, getVehicleTypeRanking(), fw);
-			dumpVehicleNameRank(FragalyzerConstants.vehiclename, getVehicleNameRanking(), fw);
-			dumpWeaponTypeRank(FragalyzerConstants.weapontype, getWeaponTypeRanking(), fw);
-			dumpWeaponNameRank(FragalyzerConstants.weaponname, getWeaponNameRanking(), fw);
+			dumpVehicleTypeRank(FragalyzerConstants.vehicletype, getVehicleTypeRanking(), getVehicleNameRanking(), fw);
+			// dumpVehicleNameRank(FragalyzerConstants.vehiclename,
+			// getVehicleNameRanking(), fw);
+			dumpWeaponTypeRank(FragalyzerConstants.weapontype, getWeaponTypeRanking(), getWeaponNameRanking(), fw);
+			// dumpWeaponNameRank(FragalyzerConstants.weaponname,
+			// getWeaponNameRanking(), fw);
 			while (it.hasNext()) {
 
 				obj = new JSONObject();
@@ -906,6 +999,55 @@ public class Ranker {
 
 	}
 
+	private void dumpVehicleTypeRank(String name, HashMap<VehicleType, HashMap<String, Integer>> ranks,
+			HashMap<String, HashMap<String, Integer>> vehicleNameRanking, FileWriter fw) {
+		int count = 0;
+
+		for (Map.Entry<VehicleType, HashMap<String, Integer>> entry : ranks.entrySet()) {
+			try {
+				fw.write(dumpRank(FragalyzerConstants.vehicleTypeNames.get(entry.getKey()), entry.getValue()) + ",");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			for (Map.Entry<String, HashMap<String, Integer>> entry2 : vehicleNameRanking.entrySet()) {
+				if (entry2.getKey() != null) {
+					String tn = findTemplateNameFromHudName(entry2.getKey()).toLowerCase();
+					if (FragalyzerConstants.vehicleTypes.containsKey(tn)) {
+						if (FragalyzerConstants.vehicleTypes.get(tn.toLowerCase()).equals(entry.getKey())) {
+							try {
+								fw.write(dumpRank(entry2.getKey(), entry2.getValue()) + ",");
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					} else
+						System.out.println("Missing template for " + tn);
+				}
+			}
+		}
+
+	}
+
+	private String findTemplateNameFromHudName(String name) {
+		for (Entry<String, String> entry : FragalyzerConstants.vehicleNames.entrySet()) {
+			if (Objects.equals(name, entry.getValue())) {
+				return entry.getKey();
+			}
+		}
+		return "Unknown";
+	}
+
+	private String findWeaponTemplateNameFromHudName(String name) {
+		for (Entry<String, String> entry : FragalyzerConstants.weaponNames.entrySet()) {
+			if (Objects.equals(name, entry.getValue())) {
+				return entry.getKey();
+			}
+		}
+		return "Unknown";
+	}
+
 	private void dumpVehicleTypeRank(String name, HashMap<VehicleType, HashMap<String, Integer>> ranks, FileWriter fw) {
 		int count = 0;
 
@@ -916,11 +1058,27 @@ public class Ranker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
 		}
 
 	}
 
-	private void dumpWeaponTypeRank(String name, HashMap<WeaponType, HashMap<String, Integer>> ranks, FileWriter fw) {
+	static <K, V extends Comparable<? super V>> List<Entry<K, V>> entriesSortedByValues(Map<K, V> map) {
+
+		List<Entry<K, V>> sortedEntries = new ArrayList<Entry<K, V>>(map.entrySet());
+
+		Collections.sort(sortedEntries, new Comparator<Entry<K, V>>() {
+			@Override
+			public int compare(Entry<K, V> e1, Entry<K, V> e2) {
+				return e2.getValue().compareTo(e1.getValue());
+			}
+		});
+
+		return sortedEntries;
+	}
+
+	private void dumpWeaponTypeRank(String name, HashMap<WeaponType, HashMap<String, Integer>> ranks,
+			HashMap<String, HashMap<String, Integer>> weaponNameRanks, FileWriter fw) {
 
 		for (Map.Entry<WeaponType, HashMap<String, Integer>> entry : ranks.entrySet()) {
 			try {
@@ -929,12 +1087,28 @@ public class Ranker {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			
+			for (Map.Entry<String, HashMap<String, Integer>> entry2 : weaponNameRanks.entrySet()) {
+				if (entry2.getKey() != null) {
+					String tn = findWeaponTemplateNameFromHudName(entry2.getKey()).toLowerCase();
+					if (FragalyzerConstants.weaponTypes.containsKey(tn)) {
+						if (FragalyzerConstants.weaponTypes.get(tn.toLowerCase()).equals(entry.getKey())) {
+							try {
+								fw.write(dumpRank(entry2.getKey(), entry2.getValue()) + ",");
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					} else
+						System.out.println("Missing template for " + tn);
+				}
+			}
 		}
 
 	}
 
 	private void dumpWeaponNameRank(String name, HashMap<String, HashMap<String, Integer>> ranks, FileWriter fw) {
-
 
 		for (Map.Entry<String, HashMap<String, Integer>> entry : ranks.entrySet()) {
 			try {
@@ -1007,6 +1181,10 @@ public class Ranker {
 		return tkRanking;
 	}
 
+	public HashMap<String, Integer> getTkedRanking() {
+		return tkedRanking;
+	}
+
 	private Tr getTr() {
 		int c = getTd_counter();
 		c++;
@@ -1039,6 +1217,7 @@ public class Ranker {
 		setKillRanking(new HashMap<>());
 		setDeathsRanking(new HashMap<>());
 		setTkRanking(new HashMap<>());
+		setTkedRanking(new HashMap<>());
 		setCpCapRanking(new HashMap<>());
 		setCpCapAassistRanking(new HashMap<>());
 		setCpDefendRanking(new HashMap<>());
@@ -1172,6 +1351,10 @@ public class Ranker {
 
 	public void setTkRanking(HashMap<String, Integer> tkRanking) {
 		this.tkRanking = tkRanking;
+	}
+
+	public void setTkedRanking(HashMap<String, Integer> tkedRanking) {
+		this.tkedRanking = tkedRanking;
 	}
 
 	public void setVehicleNameRanking(HashMap<String, HashMap<String, Integer>> vehicleNameRanking) {

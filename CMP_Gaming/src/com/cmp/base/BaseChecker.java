@@ -17,6 +17,7 @@ import java.util.StringTokenizer;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import com.cmp.fragalyzer.FragalyzerConstants;
 import com.hp.gagawa.java.elements.A;
 import com.hp.gagawa.java.elements.Body;
 import com.hp.gagawa.java.elements.Div;
@@ -39,16 +40,9 @@ public class BaseChecker {
 	private Collection<String> gamePlayObjects;
 	private String basePath;
 
-	public HashMap<String, String> vehicle_names;
+
 	private HashMap<String, Float> kitLimit;
 	public HashMap<String, String> spawnerCondition;
-	private HashMap<String, GenericType> vehicleTypes;
-
-	private HashMap<String, GenericType> weaponTypes;
-
-	private HashMap<String, GenericType> kitTypes;
-
-	private HashMap<String, FH2Object> vehicles;
 
 	private HashMap<String, String> flagNames;
 
@@ -101,7 +95,7 @@ public class BaseChecker {
 				return;
 				
 			}
-		readObjects();
+		setFlagNames();
 		readFiles(gpo);
 		populateCPs();
 		populateObjectsSpawners();
@@ -540,28 +534,7 @@ public class BaseChecker {
 		return tr;
 	}
 
-	private HashMap<String, GenericType> fillTypeMap(String source) {
-		Collection<String> types = fileReader.getFile(source);
-		String template, type;
-		StringTokenizer tok;
 
-		HashMap<String, GenericType> map = new HashMap<String, GenericType>();
-		Iterator<String> it = types.iterator();
-		while (it.hasNext()) {
-			tok = new StringTokenizer(it.next(), ":");
-			while (tok.hasMoreTokens()) {
-				template = tok.nextToken();
-				type = tok.nextToken();
-				if (WeaponTypes.contains(type.trim()))
-					map.put(template, WeaponTypes.valueOf(type));
-				if (KitTypes.contains(type.trim()))
-					map.put(template, KitTypes.valueOf(type));
-				if (VehicleTypes.contains(type.trim()))
-					map.put(template, VehicleTypes.valueOf(type));
-			}
-		}
-		return map;
-	}
 
 	private String findValueInCollection(String value, Collection<String> col) {
 		boolean found = false;
@@ -643,9 +616,7 @@ public class BaseChecker {
 		return kits;
 	}
 
-	public HashMap<String, GenericType> getKitTypes() {
-		return kitTypes;
-	}
+
 
 	private Float getLimitfromLimitKitMapdata(String line) {
 		int start, end;
@@ -756,15 +727,13 @@ public class BaseChecker {
 		switch (team) {
 		case "1":
 
-			if (getVehicles().get(spawner.getTemplate1()) != null)
-				return getVehicles().get(spawner.getTemplate1())
-						.getDisplayName();
+			if (FragalyzerConstants.vehicleNames.containsKey(spawner.getTemplate1()))
+				return FragalyzerConstants.vehicleNames.get(spawner.getTemplate1());
 			else
 				return spawner.getTemplate1();
 		case "2":
-			if (getVehicles().get(spawner.getTemplate2()) != null)
-				return getVehicles().get(spawner.getTemplate2())
-						.getDisplayName();
+			if (FragalyzerConstants.vehicleNames.containsKey(spawner.getTemplate2()))
+				return FragalyzerConstants.vehicleNames.get(spawner.getTemplate2());
 			else
 				return spawner.getTemplate2();
 		default:
@@ -812,17 +781,7 @@ public class BaseChecker {
 				FhtConstants.numberOfTickets + layer + " 2", getInitLines()));
 	}
 
-	public HashMap<String, FH2Object> getVehicles() {
-		return vehicles;
-	}
 
-	public HashMap<String, GenericType> getVehicleTypes() {
-		return vehicleTypes;
-	}
-
-	public HashMap<String, GenericType> getWeaponTypes() {
-		return weaponTypes;
-	}
 
 	private void populateCPs() {
 		Iterator<String> it_gpo = getGamePlayObjects().iterator();
@@ -939,10 +898,8 @@ public class BaseChecker {
 				spawner.setTemplate1(line.substring(
 						line.trim().lastIndexOf(" ") + 1).toLowerCase());
 
-				if (getVehicleTypes().containsKey(spawner.getTemplate1())) {
-					spawner.setVehicleType(VehicleTypes
-							.valueOf(getVehicleTypes().get(
-									spawner.getTemplate1()).toString()));
+				if (FragalyzerConstants.vehicleTypes.containsKey(spawner.getTemplate1())) {
+					spawner.setVehicleType(FragalyzerConstants.vehicleTypes.get(spawner.getTemplate1()));
 					switch (spawner.getVehicleType()) {
 					case VEHICLE_TYPE_AIR:
 					case VEHICLE_TYPE_ARMOREDCAR:
@@ -956,15 +913,13 @@ public class BaseChecker {
 						break;
 					}
 				}
-				if (getWeaponTypes().containsKey(spawner.getTemplate1()))
-					spawner.setWeaponType(WeaponTypes.valueOf(getWeaponTypes()
-							.get(spawner.getTemplate1()).toString()));
-				if (getKitTypes().containsKey(spawner.getTemplate1()))
-					spawner.setKitType(KitTypes.valueOf(getKitTypes().get(
-							spawner.getTemplate1()).toString()));
+				if (FragalyzerConstants.weaponTypes.containsKey(spawner.getTemplate1()))
+					spawner.setWeaponType(FragalyzerConstants.weaponTypes.get(spawner.getTemplate1()));
+				if (FragalyzerConstants.kitTypes.containsKey(spawner.getTemplate1()))
+					spawner.setKitType(FragalyzerConstants.kitTypes.get(spawner.getTemplate1()));
 				spawner.setHUDName1(getTemplateName(spawner, "1"));
-				if (getVehicles().containsKey(spawner.getTemplate1()))
-					spawner.setFh2ImageName1(getVehicles().get(
+				if (FragalyzerConstants.vehicleTypes.containsKey(spawner.getTemplate1()))
+					spawner.setFh2ImageName1(FragalyzerConstants.vehicleTypes.get(
 							spawner.getTemplate1()).getFh2ImageName());
 
 			}
@@ -1180,53 +1135,8 @@ public class BaseChecker {
 		setMapdata(fileReader.getFh2File(getBasePath() + FhtConstants.mapdata));
 	}
 
-	private void readObjects() {
 
-		setVehicleTypes(fillTypeMap("VehicleTypes.txt"));
-		setWeaponTypes(fillTypeMap("WeaponTypes.txt"));
-		setKitTypes(fillTypeMap("KitTypes.txt"));
-		setFlagNames();
-		readVehicleMasterdata();
 
-		Iterator<Entry<String, FH2Object>> ite = getVehicles().entrySet()
-				.iterator();
-		Entry<String, FH2Object> objectEntry;
-
-		vehicle_names = new HashMap<>();
-		while (ite.hasNext()) {
-			objectEntry = ite.next();
-
-			vehicle_names.put(objectEntry.getValue().getTemplate(), objectEntry
-					.getValue().getDisplayName());
-		}
-	}
-
-	private void readVehicleMasterdata() {
-		Collection<String> types = fileReader
-				.getFile("vehicles_with_imagenames.txt");
-		String template, hudName, fh2ImageName;
-		StringTokenizer tok;
-		FH2Object o;
-		template = new String();
-		hudName = new String();
-		fh2ImageName = new String();
-		HashMap<String, FH2Object> map = new HashMap<String, FH2Object>();
-		Iterator<String> it = types.iterator();
-		while (it.hasNext()) {
-			o = new FH2Object();
-			tok = new StringTokenizer(it.next(), ",");
-			while (tok.hasMoreTokens()) {
-				template = tok.nextToken();
-				hudName = tok.nextToken();
-				fh2ImageName = tok.nextToken();
-			}
-			o.setDisplayName(hudName);
-			o.setTemplate(template);
-			o.setFh2ImageName(fh2ImageName);
-			map.put(template, o);
-		}
-		setVehicles(map);
-	}
 
 	public void setBasePath(String basePath) {
 		this.basePath = basePath;
@@ -1270,9 +1180,7 @@ public class BaseChecker {
 		this.initLines = initLines;
 	}
 
-	public void setKitTypes(HashMap<String, GenericType> kitTypes) {
-		this.kitTypes = kitTypes;
-	}
+
 
 	private void setMapdata(Collection<String> mapdata_lines) {
 		kitLimit = new HashMap<String, Float>();
@@ -1303,15 +1211,7 @@ public class BaseChecker {
 		return ret;
 	}
 
-	public void setVehicles(HashMap<String, FH2Object> vehicles) {
-		this.vehicles = vehicles;
-	}
 
-	public void setVehicleTypes(HashMap<String, GenericType> vehicleTypes) {
-		this.vehicleTypes = vehicleTypes;
-	}
 
-	public void setWeaponTypes(HashMap<String, GenericType> weaponTypes) {
-		this.weaponTypes = weaponTypes;
-	}
+
 }

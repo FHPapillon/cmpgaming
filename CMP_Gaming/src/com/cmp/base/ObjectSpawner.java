@@ -1,5 +1,9 @@
 package com.cmp.base;
 
+import com.cmp.fragalyzer.types.KitType;
+import com.cmp.fragalyzer.types.VehicleType;
+import com.cmp.fragalyzer.types.WeaponType;
+
 public class ObjectSpawner implements Comparable<ObjectSpawner> {
 	private String name;
 
@@ -14,9 +18,9 @@ public class ObjectSpawner implements Comparable<ObjectSpawner> {
 	private String teamlocked;
 	private String maxNrSpawned;
 
-	private VehicleTypes vehicleType;
-	private WeaponTypes weaponType;
-	private KitTypes kitType;
+	private VehicleType vehicleType;
+	private WeaponType weaponType;
+	private KitType kitType;
 	private String HUDName1;
 	private String HUDName2;
 	private Fh2SpawnerType type;
@@ -67,7 +71,7 @@ public class ObjectSpawner implements Comparable<ObjectSpawner> {
 	public String getHUDName2() {
 		return HUDName2;
 	}
-	public KitTypes getKitType() {
+	public KitType getKitType() {
 		return kitType;
 	}
 	public String getMaxNrSpawned() {
@@ -124,11 +128,11 @@ public class ObjectSpawner implements Comparable<ObjectSpawner> {
 	public String getTimeToLive() {
 		return timeToLive;
 	}
-	public VehicleTypes getVehicleType() {
+	public VehicleType getVehicleType() {
 		return vehicleType;
 	}
 
-	public WeaponTypes getWeaponType() {
+	public WeaponType getWeaponType() {
 		return weaponType;
 	}
 
@@ -157,7 +161,7 @@ public class ObjectSpawner implements Comparable<ObjectSpawner> {
 
 
 
-	public void setKitType(KitTypes kitType) {
+	public void setKitType(KitType kitType) {
 		this.kitType = kitType;
 	}
 
@@ -198,11 +202,11 @@ public class ObjectSpawner implements Comparable<ObjectSpawner> {
 	}
 
 
-	public void setVehicleType(VehicleTypes vehicleType) {
+	public void setVehicleType(VehicleType vehicleType) {
 		this.vehicleType = vehicleType;
 	}
 
-	public void setWeaponType(WeaponTypes weaponType) {
+	public void setWeaponType(WeaponType weaponType) {
 		this.weaponType = weaponType;
 	}
 

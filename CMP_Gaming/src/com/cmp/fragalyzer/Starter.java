@@ -15,7 +15,7 @@ public class Starter {
 
 	public static void main(String[] args) {
 		LogReader lr = new LogReader();
-		String basePath = "E://Documents//FHT//logs";
+		String basePath = "E://FHT//logs";
 		Ranker ranker = new Ranker(basePath);
 		HeatmapDataProvider hdp = new HeatmapDataProvider(basePath);
 		lr.readBattleLogs(basePath);
