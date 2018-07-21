@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class ObjectCrawler {
 	public void setVehicles(ArrayList<Vehicle> vehicles) {
 		this.vehicles = vehicles;
 	}
-	ArrayList<ProjectileTemplate> projectiles;
+	ArrayList<Projectile> projectiles;
 	ArrayList<Weapon> weapons;
 	public boolean onlyTeamlock;;
 
@@ -66,7 +67,7 @@ public class ObjectCrawler {
 		setVehicles(new ArrayList<>());
 	}
 
-	private void dumpAvailableVehicles(String basePath) {
+	private void readVehicles(String basePath) {
 		Path p = Paths.get(basePath);
 
 		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
@@ -75,34 +76,55 @@ public class ObjectCrawler {
 
 				int dot = file.toString().lastIndexOf(".");
 				suffix = file.toString().substring(dot + 1);
-				// if (file.toString().substring(dot + 1).equals(suffix)) {
-				// System.out.println(file);
-				// System.out.println();
+				String line;
+
 				String fileName = file.getFileName().toString();
 				switch (suffix) {
 				case "tweak":
 					Vehicle vehicle = new Vehicle();
-					HashMap<String, String> tweakFile = getFileContent(file);
-					String name = tweakFile.get("ObjectTemplate.vehicleHud.hudName");
-					if (name == null)
-						name = tweakFile.get("ObjectTemplate.weaponHud.hudName");
-					if (name == null)
-						name = "Unknown";
-					vehicle.setName(name);
-					vehicle.setTemplateName(fileName);
-					if (!name.equals("Unknown")) {
-						System.out.println("Name: " + name + " (" + fileName + ")");
+					ArrayList<String> tweakFile = getFileContentList(file);
+					
+					Iterator<String> itf = tweakFile.iterator();
+					while (itf.hasNext()) {
+						line = itf.next();
+						if (!getValueForKeyFromTweakLine("ObjectTemplate.vehicleHud.hudName", line).equals(""))
+							vehicle.setName(
+									getValueForKeyFromTweakLine("ObjectTemplate.vehicleHud.hudName", line).replace("\"", ""));
+						
+					}
+					if (vehicle.getName()==null)
+						vehicle.setName("Unknown");
+		
+					vehicle.setTemplateName(fileName.substring(0, fileName.indexOf(".")));
+					
+					vehicle.setTeam(basePath.substring(basePath.length()-4, (basePath.length()-2)));
+				
+					
+					vehicle.setVehicleType(FragalyzerConstants.vehicleTypes.get(vehicle.getTemplateName()));
+					if (!vehicle.getName().equals("Unknown")) {
+						System.out.println("Name: " + vehicle.getName() + " (" + fileName + ")");
 						ArrayList<String> tweakList = getFileContentList(file);
 						ArrayList<Gun> guns = getGunsFromVehicle(tweakList);
-						Iterator<Gun> it = guns.iterator();
-						while (it.hasNext())
-							System.out.println(it.next().toString());
-
+						if (!guns.isEmpty()) {
+							Iterator<Gun> it = guns.iterator();
+						
+							while (it.hasNext()) {
+								if(vehicle.getPrimaryGun() == null)
+									vehicle.setPrimaryGun(it.next());
+								if(vehicle.getSecondaryGun() == null && it.hasNext())
+									vehicle.setSecondaryGun(it.next());
+								if(vehicle.getTertiaryGun() == null && it.hasNext())
+									vehicle.setTertiaryGun(it.next());		
+								if(it.hasNext())
+									System.out.println(it.next().toString());
+							}
+						}
 						vehicle.setMaterial(getArmorMaterial(tweakList));
 						vehicle.setHP(getHP(tweakList));
 
 					}
-					getVehicles().add(vehicle);
+					if (vehicle.getName()!= "Unknown")
+						getVehicles().add(vehicle);
 				default:
 					break;
 				}
@@ -148,9 +170,9 @@ public class ObjectCrawler {
 		return new Material();
 	}	
 
-	private ProjectileTemplate findProjectile(String name) {
-		Iterator<ProjectileTemplate> it = getProjectiles().iterator();
-		ProjectileTemplate w = new ProjectileTemplate();
+	private Projectile findProjectile(String name) {
+		Iterator<Projectile> it = getProjectiles().iterator();
+		Projectile w = new Projectile();
 		while (it.hasNext()) {
 			w = it.next();
 			if (w.getName() != null)
@@ -158,7 +180,7 @@ public class ObjectCrawler {
 					return w;
 		}
 		System.out.println("Did not find " + name);
-		return new ProjectileTemplate();
+		return new Projectile();
 	}
 	
 	
@@ -320,14 +342,333 @@ public class ObjectCrawler {
 		// printProjectiles();
 		readWeapons(basePath + "objects//weapons//");
 		// printWeapons();
-		readKits(basePath + "objects//kits//");
+		readKits(basePath + "objects//kits//ba");
+		readKits(basePath + "objects//kits//bw");
+		readKits(basePath + "objects//kits//be");
+		readKits(basePath + "objects//kits//spawnable", "b");
+		writeKitsToCSV(basePath, "kit_gb.csv");
 		// printKits();
-		dumpAvailableVehicles(basePath + "objects//Vehicles//land//");
-		//printVehicles();
+		setKits(new ArrayList<>());
+		
+		readKits(basePath + "objects//kits//cw");
+		readKits(basePath + "objects//kits//spawnable", "c");
+		writeKitsToCSV(basePath, "kit_ca.csv");
+		// printKits();
+		setKits(new ArrayList<>());		
+		
+		readKits(basePath + "objects//kits//ga");
+		readKits(basePath + "objects//kits//gc");
+		readKits(basePath + "objects//kits//gm");
+		readKits(basePath + "objects//kits//gs");
+		readKits(basePath + "objects//kits//gw");	
+		readKits(basePath + "objects//kits//spawnable", "g");
+		writeKitsToCSV(basePath, "kit_de.csv");
+		// printKits();
+		setKits(new ArrayList<>());		
+		
+		readKits(basePath + "objects//kits//ia");
+		readKits(basePath + "objects//kits//spawnable", "i");
+		writeKitsToCSV(basePath, "kit_it.csv");
+		// printKits();
+		setKits(new ArrayList<>());
+		
+		readKits(basePath + "objects//kits//jp");
+		readKits(basePath + "objects//kits//spawnable", "j");
+		writeKitsToCSV(basePath, "kit_jp.csv");
+		// printKits();
+		setKits(new ArrayList<>());				
+		
+		readKits(basePath + "objects//kits//re");
+		readKits(basePath + "objects//kits//spawnable", "r");
+		writeKitsToCSV(basePath, "kit_ru.csv");	
+		// printKits();
+		setKits(new ArrayList<>());		
+		
+		readKits(basePath + "objects//kits//se");
+		readKits(basePath + "objects//kits//spawnable", "s");
+		writeKitsToCSV(basePath, "kit_fi.csv");
+		// printKits();
+		setKits(new ArrayList<>());		
+		
+		
+		readKits(basePath + "objects//kits//ua");
+		readKits(basePath + "objects//kits//uc");
+		readKits(basePath + "objects//kits//uw");
+		readKits(basePath + "objects//kits//up");	
+		readKits(basePath + "objects//kits//spawnable", "u");
+		writeKitsToCSV(basePath, "kit_us.csv");
+		// printKits();
+		setKits(new ArrayList<>());			
+		readKits(basePath + "objects//kits");
+		writeKitsToCSV(basePath, "kits_all.csv");
+		
+		//writeKitsToCSV(basePath);
+		writeWeaponsToCSV(basePath);
+		
+		readVehicles(basePath + "objects//Vehicles//land//de//");
+		writeVehiclesToCSV(basePath, "land_de");
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//jp//");
+		writeVehiclesToCSV(basePath, "land_jp");
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//us//");
+		writeVehiclesToCSV(basePath, "land_us");	
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//gb//");
+		writeVehiclesToCSV(basePath, "land_gb");		
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//se//");
+		writeVehiclesToCSV(basePath, "land_se");		
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//ru//");
+		writeVehiclesToCSV(basePath, "land_ru");
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//it//");
+		writeVehiclesToCSV(basePath, "land_it");
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//au//");
+		writeVehiclesToCSV(basePath, "land_au");
+		writeVehiclesToCSV(basePath, "land_all");
+		
+		readVehicles(basePath + "objects//Vehicles//air//de//");
+		writeVehiclesToCSV(basePath, "air_de");
+		writeVehiclesToCSV(basePath, "air_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//jp//");
+		writeVehiclesToCSV(basePath, "air_jp");
+		writeVehiclesToCSV(basePath, "air_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//us//");
+		writeVehiclesToCSV(basePath, "air_us");	
+		writeVehiclesToCSV(basePath, "air_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//gb//");
+		writeVehiclesToCSV(basePath, "air_gb");	
+		writeVehiclesToCSV(basePath, "air_all");	
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//se//");
+		writeVehiclesToCSV(basePath, "air_se");	
+		writeVehiclesToCSV(basePath, "air_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//ru//");
+		writeVehiclesToCSV(basePath, "air_ru");	
+		writeVehiclesToCSV(basePath, "air_all");
+		
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//air//it//");
+		writeVehiclesToCSV(basePath, "air_it");	
+		writeVehiclesToCSV(basePath, "air_all");
+	
+		setVehicles(new ArrayList<>());
+		readVehicles(basePath + "objects//Vehicles//land//civ//");
+		writeVehiclesToCSV(basePath, "land_civ");	
+		
+		writeMaterialsToCSV(basePath);
+		writeProjectilesToCSV(basePath);
+				
 		return null;
 	}
+private void writeMaterialsToCSV(String basePath){
+		
+        try {
+			String csvFile = basePath + "materials.csv";
+			FileWriter writer = new FileWriter(csvFile);
+			Iterator<Material> it = getMaterials().iterator();
+			Material material;
+			CSVUtils.writeLine(writer, Arrays.asList(
+					"Name", 
+					"Number", 
+					"Penetration in mm",
+					"Strength in mm")			
+					);
+			
+			while(it.hasNext()){
+				material = it.next();
+				CSVUtils.writeLine(writer,material.getMaterialOutput());
+			}
 
-	public ArrayList<ProjectileTemplate> getProjectiles() {
+	        writer.flush();
+	        writer.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
+
+private void writeProjectilesToCSV(String basePath){
+	
+    try {
+		String csvFile = basePath + "projectiles.csv";
+		FileWriter writer = new FileWriter(csvFile);
+		Iterator<Projectile> it = getProjectiles().iterator();
+		Projectile projectile;
+		CSVUtils.writeLine(writer, Arrays.asList(
+				"Name", 
+				"Damage", 
+				"Min Damage",
+				"Distance to Min Damage",
+				"Distance to start loosing damage",
+				"Material")			
+				);
+		
+		while(it.hasNext()){
+			projectile = it.next();
+			CSVUtils.writeLine(writer,projectile.getProjectilelOutput(),';');
+		}
+
+        writer.flush();
+        writer.close();
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}	
+	private void writeKitsToCSV(String basePath, String filename){
+		
+        try {
+			String csvFile = basePath + filename;
+			FileWriter writer = new FileWriter(csvFile);
+			Iterator<Kit> it = getKits().iterator();
+			Kit kit;
+			CSVUtils.writeLine(writer, Arrays.asList(
+					"Team", 
+					"Name", 
+					"Primary Weapon", 
+					"Primary Template",
+					"Secondary Weapon", 
+					"Secondary Template",	
+					"CQ Weapon", 
+					"CQ Template",
+					"AP", 
+					"AP Template",		
+					"Grenade", 
+					"Grenade Template",	
+					"Binocs",		
+					"Wrench", 
+					"Smoke"		)			
+					);
+			
+			while(it.hasNext()){
+				kit = it.next();
+				CSVUtils.writeLine(writer,kit.getKitOutput());
+			}
+
+	        writer.flush();
+	        writer.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+private void writeWeaponsToCSV(String basePath){
+		
+        try {
+			String csvFile = basePath + "weapons.csv";
+			FileWriter writer = new FileWriter(csvFile);
+			Iterator<Weapon> it = getWeapons().iterator();
+			Weapon weapon;
+			CSVUtils.writeLine(writer, Arrays.asList(
+					"Name", 
+					"Template", 
+					"Type", 
+					"HP", 
+					"1st Gun",
+					"1st Projectile",
+					"1st Projectile Velocity",		
+					"1st Rounds per Mag",					
+					"1st Magazines"
+					),';'			
+					);
+			
+			while(it.hasNext()){
+				weapon = it.next();
+				CSVUtils.writeLine(writer,weapon.getWeaponOutput(),';');
+			}
+
+	        writer.flush();
+	        writer.close();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}	
+
+private void writeVehiclesToCSV(String basePath, String team){
+	
+    try {
+		String csvFile = basePath + "vehicles_" + team + ".csv";
+		FileWriter writer = new FileWriter(csvFile, true);
+		
+		Iterator<Vehicle> it = getVehicles().iterator();
+		Vehicle vehicle;
+		
+		CSVUtils.writeLine(writer, Arrays.asList(
+				"Name", 
+				"Template", 
+				"Team",
+				"Type", 
+				"HP",
+				"1st Gun",
+				"Projectile",
+				"Projectile Velocity",					
+				"Penetration",
+				"Magazines", 
+				"Rounds per Mag",
+				"2nd Gun",
+				"Projectile",
+				"Projectile Velocity",	
+				"Penetration",
+				"Magazines", 
+				"Rounds per Mag",
+				"3rd Gun",
+				"Projectile",
+				"Projectile Velocity",		
+				"Penetration",
+				"Magazines", 
+				"Rounds per Mag"	
+				),';'			
+				);
+		
+		while(it.hasNext()){
+			vehicle = it.next();
+			CSVUtils.writeLine(writer,vehicle.getVehicleOutput(),';');
+		}
+
+        writer.flush();
+        writer.close();
+		
+	} catch (IOException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
+}	
+
+
+	public ArrayList<Projectile> getProjectiles() {
 		return projectiles;
 	}
 
@@ -345,12 +686,16 @@ public class ObjectCrawler {
 			
 			if(line.startsWith("objecttemplate.create genericfirearm") || line.startsWith("objecttemplate.activesafe genericfirearm")) {
 				count ++;
-				if (count > 1)
+				if (count > 1 && gun.getName()!=null)
 					ret.add(gun);
+				if (count > 1 && gun.getName()==null)
+					count--;
 				gun = new Gun();				
 			}
-			if(line.startsWith("objecttemplate.weaponhud.hudname")) 						
+			if(line.startsWith("objecttemplate.weaponhud.hudname")) 	 {					
 				gun.setName(line.substring(line.indexOf(" "), line.length()));
+				gun.setName(gun.getName().substring(0, gun.getName().length()).replace("\"", ""));
+			}
 					
 			if(line.startsWith("objecttemplate.velocity")) 								
 				gun.setVelocity(new Integer(line.substring(line.indexOf(" "), line.length()).trim()).intValue());
@@ -366,7 +711,8 @@ public class ObjectCrawler {
 				
 			}
 		}
-		ret.add(gun);
+		if(gun.getName()!=null)
+			ret.add(gun);
 		return ret;
 	}
 
@@ -394,7 +740,7 @@ public class ObjectCrawler {
 	}
 
 	private void printProjectiles() {
-		Iterator<ProjectileTemplate> it = getProjectiles().iterator();
+		Iterator<Projectile> it = getProjectiles().iterator();
 		while (it.hasNext())
 			System.out.println(it.next().toString());
 	}
@@ -412,21 +758,69 @@ public class ObjectCrawler {
 		while (it.hasNext())
 			System.out.println(it.next().toString());
 	}	
-
+	
+	private String getTeamFromKitPrefix(String prefix) {
+		switch (prefix) {
+		case "ga":
+		case "gs":
+		case "gw":
+		case "gm":
+		case "gc":
+			return "de";
+			
+		case "ia":
+			return "it";
+			
+		case "aa":
+			return "au";
+			
+		case "ba":
+		case "bw":
+		case "be":
+		case "bj":
+			return "gb";
+			
+		case "cw":
+			return "ca";
+			
+		case "jp":
+			return "jp";
+				
+		case "ua":
+		case "uc":
+		case "up":
+		case "uw":
+		case "us":			
+			return "us";
+		case "re":
+			return "ru";
+		case "se":
+			return "fi";			
+			
+		default:
+			return "??";
+		}
+	}
+	
 	private void readKits(String basePath) {
+		readKits(basePath, "");
+	}
+	private void readKits(String basePath, String prefix_filter) {
 		Path p = Paths.get(basePath);
 
 		FileVisitor<Path> fv = new SimpleFileVisitor<Path>() {
 			@Override
 			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-
+				String prefix = file.getFileName().toFile().getName().substring(0, 1);
 				int dot = file.toString().lastIndexOf(".");
 				suffix = file.toString().substring(dot + 1);
+				
 
 				String line;
 				String kitType;
 				String weapon;
 				WeaponType weaponType;
+				if (prefix_filter == "" || prefix.toLowerCase().equals(prefix_filter.toLowerCase())) {
 				switch (suffix) {
 				case "inc":
 
@@ -439,8 +833,8 @@ public class ObjectCrawler {
 						if (!getValueForKeyFromTweakLine("ObjectTemplate.create Kit", line).equals("")) {
 							kit.setIngameName(
 									getValueForKeyFromTweakLine("ObjectTemplate.create Kit", line).toLowerCase());
-							kit.setTeam(
-									kit.getIngameName().substring(0, kit.getIngameName().indexOf("_")).toLowerCase());
+							kit.setTeam(getTeamFromKitPrefix(
+									kit.getIngameName().substring(0, kit.getIngameName().indexOf("_")).toLowerCase()));
 							// System.out.println(kit.getIngameName() + " " +
 							// kit.getTeam());
 						}
@@ -468,6 +862,7 @@ public class ObjectCrawler {
 								break;
 							case WEAPON_TYPE_RIFLE:
 							case WEAPON_TYPE_SMG:
+							case WEAPON_TYPE_LMG:
 								kit.setPrimaryWeapon(w);
 								break;
 							case WEAPON_TYPE_PISTOL:
@@ -480,10 +875,8 @@ public class ObjectCrawler {
 								kit.setHasBinocs(true);
 								break;
 							case WEAPON_TYPE_GRENADE:
-								if (kit.getSecondaryWeapon() == null)
-									kit.setSecondaryWeapon(w);
-								else
-									kit.setGrenade(w);
+						
+								kit.setGrenade(w);
 								break;
 							case WEAPON_TYPE_APMINE:
 								kit.setApMine(w);
@@ -503,12 +896,13 @@ public class ObjectCrawler {
 
 						}
 
-					}
-					if (kit.getIngameName() != null)
-						getKits().add(kit);
 
+					}
+					if (kit.getIngameName() != null && !kit.getIngameName().toLowerCase().startsWith("fa"))
+						getKits().add(kit);
 				default:
 					break;
+				}
 				}
 
 				// }
@@ -580,7 +974,7 @@ public class ObjectCrawler {
 
 				int dot = file.toString().lastIndexOf(".");
 				suffix = file.toString().substring(dot + 1);
-				ProjectileTemplate projectile = new ProjectileTemplate();
+				Projectile projectile = new Projectile();
 				String line;
 				switch (suffix) {
 				case "tweak":
@@ -595,7 +989,7 @@ public class ObjectCrawler {
 							// System.out.println(projectile.toString());
 							if (projectile.getName() != null)
 								getProjectiles().add(projectile);
-							projectile = new ProjectileTemplate();
+							projectile = new Projectile();
 							projectile.setName(
 									getValueForKeyFromTweakLine("ObjectTemplate.activeSafe GenericProjectile", line));
 						}
@@ -674,7 +1068,8 @@ public class ObjectCrawler {
 					}
 					weapon.setType(FragalyzerConstants.weaponTypes.get(weapon.getTemplateName()));
 					weapon.setName(FragalyzerConstants.weaponNames.get(weapon.getTemplateName()));
-					getWeapons().add(weapon);
+					if (weapon.getTemplateName() != null)
+						getWeapons().add(weapon);
 
 				default:
 					break;
@@ -705,7 +1100,7 @@ public class ObjectCrawler {
 		this.materials = materials;
 	}
 
-	public void setProjectiles(ArrayList<ProjectileTemplate> projectiles) {
+	public void setProjectiles(ArrayList<Projectile> projectiles) {
 		this.projectiles = projectiles;
 	}
 

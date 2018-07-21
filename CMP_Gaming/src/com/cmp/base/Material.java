@@ -1,5 +1,8 @@
 package com.cmp.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Material {
 private String name;
 private int strength_in_mm;
@@ -36,5 +39,12 @@ public String toString() {
 }
 
 
-
+public List<String> getMaterialOutput() {
+	List<String> ret = new ArrayList<>();
+	ret.add(getName());	
+	ret.add(getNumber());
+	ret.add(Integer.toString(getPenetration_in_mm()));
+	ret.add(Integer.toString(getStrength_in_mm()));
+	return ret;
+}
 }

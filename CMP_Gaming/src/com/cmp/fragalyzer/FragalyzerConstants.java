@@ -1004,6 +1004,15 @@ public class FragalyzerConstants {
 					put("m4a1mid_eu_ca", VehicleType.VEHICLE_TYPE_MEDIUMARMOR);
 					put("mc205", VehicleType.VEHICLE_TYPE_AIR);
 					put("quadbofors", VehicleType.VEHICLE_TYPE_ANTIAIR);
+					put("t70", VehicleType.VEHICLE_TYPE_LIGHTARMOR);
+					put("gertnk_stug3b", VehicleType.VEHICLE_TYPE_LIGHTARMOR);
+					put("rustnk_t26", VehicleType.VEHICLE_TYPE_LIGHTARMOR);
+					put("rustnk_t26_fi", VehicleType.VEHICLE_TYPE_LIGHTARMOR);
+					put("rusjeep_gaz67b", VehicleType.VEHICLE_TYPE_TRANSPORT);
+					put("ju87dalt", VehicleType.VEHICLE_TYPE_AIR);
+					put("t34_76_m43_fi", VehicleType.VEHICLE_TYPE_MEDIUMARMOR);
+					put("rustnk_bt7", VehicleType.VEHICLE_TYPE_LIGHTARMOR);
+					put("t34_76_m41_fi", VehicleType.VEHICLE_TYPE_MEDIUMARMOR);
 				}
 			});
 
@@ -1203,6 +1212,8 @@ public class FragalyzerConstants {
 					put("mg34bipod", WeaponType.WEAPON_TYPE_LMG);
 					put("mg42_lafette_dep", WeaponType.WEAPON_TYPE_NONLETHAL);
 					put("mg42bipod", WeaponType.WEAPON_TYPE_LMG);
+					put("mg42", WeaponType.WEAPON_TYPE_LMG);
+					put("mg34", WeaponType.WEAPON_TYPE_LMG);
 					put("millsbomb", WeaponType.WEAPON_TYPE_GRENADE);
 					put("millsbomb-1", WeaponType.WEAPON_TYPE_GRENADE);
 					put("millsbomb-3", WeaponType.WEAPON_TYPE_GRENADE);
@@ -1365,7 +1376,14 @@ public class FragalyzerConstants {
 					put("commander_mortar_axis_gun", WeaponType.WEAPON_TYPE_ARTILLERY);
 					put("commander_artillery_axis_gun", WeaponType.WEAPON_TYPE_ARTILLERY);					
 					put("lefh18_fht_gun", WeaponType.WEAPON_TYPE_ARTILLERY);	
-				}
+					put("lahti_l35", WeaponType.WEAPON_TYPE_PISTOL);	
+					put("g3340", WeaponType.WEAPON_TYPE_RIFLE);	
+					put("m1940knife", WeaponType.WEAPON_TYPE_CLOSE);	
+					put("puukko", WeaponType.WEAPON_TYPE_CLOSE);
+					put("dt_bipod", WeaponType.WEAPON_TYPE_LMG);
+					put("dt", WeaponType.WEAPON_TYPE_LMG);
+					put("maxim_mg_sandbag_ns", WeaponType.WEAPON_TYPE_LMG);
+					}
 			});
 
 	public static final Map<String, KitType> kitTypes = Collections.unmodifiableMap(new HashMap<String, KitType>() {
@@ -1955,6 +1973,10 @@ public class FragalyzerConstants {
 			put("bw_pickupcommandostenmk2s_fht", KitType.KIT_TYPE_SAPPER);
 			put("bw_pickupengineermines", KitType.KIT_TYPE_ENGINEER);
 			put("bw_pickupassault_satchel_fht", KitType.KIT_TYPE_SAPPER);
+			put("se_smgassault_limited", KitType.KIT_TYPE_SMGASSAULT);
+			put("se_lmg_dp28_limited", KitType.KIT_TYPE_LMG);
+			put("se_lmg_ls26_limited", KitType.KIT_TYPE_LMG);
+			
 		}
 	});
 
@@ -2222,6 +2244,8 @@ public class FragalyzerConstants {
 			put("t34_76_de_hullmg", "T34/76");
 			put("t34_76_hullmg", "T34/76");
 			put("t34_76_m43", "T-34/76");
+			put("t34_76_m41_fi", "T-34/76 (captured)");
+			put("t34_76_m43_fi", "T-34/76 (captured)");
 			put("t34_76_m43_camo", "T-34/76");
 			put("t34_76_m43_de", "Panzer T-34(r)");
 			put("t34_85_early", "T-34/85");
@@ -2766,6 +2790,13 @@ public class FragalyzerConstants {
 			put("commander_artillery_axis_gun", "Commander Artillery");
 			put("mg42_lafette_deployed", "MG42 Lafette");
 			put("mg34_bipod", "MG34");
+			put("t70", "T-70");
+			put("gertnk_stug3b", "Sturmgeschütz III Ausf. B");
+			put("rustnk_t26", "T-26");
+			put("rustnk_t26_fi", "T-26 (captured)");
+			put("rusjeep_gaz67b", "GAZ-67b");
+			put("ju87dalt", "Ju87D 'Stuka'");
+			put("rustnk_bt7", "T-70");
 		}
 	});
 	public static final Map<String, String> weaponNames = Collections.unmodifiableMap(new HashMap<String, String>() {
@@ -2819,6 +2850,7 @@ public class FragalyzerConstants {
 			put("dt_air", "DT");
 			put("hull_dt", "CO-AXIAL MG");
 			put("maxim1910", "Maxim 1910");
+			put("maxim_mg_sandbag_ns", "Maxim 1910");
 			put("30cal", "Vickers 0.303");
 			put("30cal_notracer", "Vickers 0.303");
 			put("30cal_notri", "Vickers 0.303");
@@ -3209,6 +3241,12 @@ public class FragalyzerConstants {
 			put("commander_artillery_axis_gun", "Commander Artillery");					
 			put("colt1911-i3-bazookam9", "Colt");
 			put("lefh18_fht_gun", "LeFH 18");
+			put("lahti_l35", "Lahti L-35");
+			put("g3340", "G33/40");
+			put("m1940knife", "M1940 Knife");
+			put("puukko", "Puukko Knife");
+			put("dt_bipod", "DT Bipod");
+			put("dt", "DT");
 		}
 	});
 }

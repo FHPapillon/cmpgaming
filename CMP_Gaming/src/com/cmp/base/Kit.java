@@ -1,5 +1,8 @@
 package com.cmp.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.cmp.fragalyzer.types.KitType;
 
 public class Kit {
@@ -30,6 +33,7 @@ public void setHasBinocs(boolean hasBinocs) {
 }
 public Kit() {
 	super();
+	
 	setHasSmoke(false);
 	setHasWrench(false);
 	setHasBinocs(false);
@@ -100,5 +104,78 @@ public String toString() {
 			+ closeQuartersWeapon + ", hasSmoke=" + hasSmoke + ", primaryWeapon=" + primaryWeapon + ", secondaryWeapon="
 			+ secondaryWeapon + ", grenade=" + grenade + ", hasWrench=" + hasWrench + ", kitType=" + kitType
 			+ ", hasBinocs=" + hasBinocs + ", apMine=" + apMine + "]";
+}
+public List<String> getKitOutput() {
+	List<String> ret = new ArrayList<>();
+	ret.add(getTeam());
+	ret.add(getIngameName());
+	if (getPrimaryWeapon()!= null) {
+		if(getPrimaryWeapon().getName() != null)
+			ret.add(getPrimaryWeapon().getName());
+		else
+			ret.add(getPrimaryWeapon().getTemplateName());
+		ret.add(getPrimaryWeapon().getTemplateName());
+	}
+	else {
+		ret.add("None");		
+		ret.add(" ");		
+	}
+	if (getSecondaryWeapon()!= null) {
+		ret.add(getSecondaryWeapon().getName());
+		ret.add(getSecondaryWeapon().getTemplateName());
+	}
+	else {
+		ret.add("None");	
+		ret.add(" ");	
+	}	
+	if (getCloseQuartersWeapon()!= null) {
+		if(getCloseQuartersWeapon().getName() !=null)
+			ret.add(getCloseQuartersWeapon().getName());
+		else
+			ret.add(getCloseQuartersWeapon().getTemplateName());
+		ret.add(getCloseQuartersWeapon().getTemplateName());
+	}
+	else {
+		ret.add("None");	
+		ret.add(" ");	
+	}	
+	if (getApMine()!= null) {
+		ret.add(getApMine().getName());
+		ret.add(getApMine().getTemplateName());
+	}
+	else {
+		ret.add("None");		
+		ret.add(" ");	
+	}	
+	if (getGrenade()!= null) {
+		if(getGrenade().getName() != null)
+			ret.add(getGrenade().getName());
+		else
+			ret.add(getGrenade().getTemplateName());
+		ret.add(getGrenade().getTemplateName());
+	}
+	else {
+		ret.add("None");		
+		ret.add(" ");	
+	}			
+	if (hasBinocs) {
+		ret.add("Has Binocs");
+	}
+	else {
+		ret.add(" ");		
+	}	
+	if (hasWrench) {
+		ret.add("Has Wrench");
+	}
+	else {
+		ret.add(" ");		
+	}
+	if (hasSmoke) {
+		ret.add("Has Smoke");
+	}
+	else {
+		ret.add(" ");		
+	}					
+	return ret;
 }
 }

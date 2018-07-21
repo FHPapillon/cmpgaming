@@ -11,7 +11,7 @@ public int getVelocity() {
 public void setVelocity(int velocity) {
 	this.velocity = velocity;
 }
-private ProjectileTemplate projectile;
+private Projectile projectile;
 public String getName() {
 	return name;
 }
@@ -30,10 +30,10 @@ public int getMags() {
 public void setMags(int mags) {
 	this.mags = mags;
 }
-public ProjectileTemplate getProjectile() {
+public Projectile getProjectile() {
 	return projectile;
 }
-public void setProjectile(ProjectileTemplate projectil) {
+public void setProjectile(Projectile projectil) {
 	this.projectile = projectil;
 }
 @Override

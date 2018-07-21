@@ -1,6 +1,9 @@
 package com.cmp.base;
 
-public class ProjectileTemplate {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Projectile {
 private String name;
 private double damage;
 private double minDamage;
@@ -48,6 +51,17 @@ public String toString() {
 	return "ProjectileTemplate [name=" + name + ", damage=" + damage + ", minDamage=" + minDamage
 			+ ", distToStartLoseDamage=" + distToStartLoseDamage + ", distToMinDamage=" + distToMinDamage
 			+ ", material=" + material + "]";
+}
+
+public List<String> getProjectilelOutput() {
+	List<String> ret = new ArrayList<>();
+	ret.add(getName());	
+	ret.add(Double.toString(getDamage()));
+	ret.add(Double.toString(getMinDamage()));
+	ret.add(Double.toString(getDistToMinDamage()));
+	ret.add(Double.toString(getDistToStartLoseDamage()));	
+	ret.add(getMaterial().getNumber());	
+	return ret;
 }
 
 }

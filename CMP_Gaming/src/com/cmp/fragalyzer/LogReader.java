@@ -314,7 +314,8 @@ public class LogReader {
 		}
 		for (Map.Entry<String, String> entry : mapper.missingKits
 				.entrySet()) {
-			System.out.println(entry.getKey() + " " + entry.getValue());
+			System.out.println("Problem: " + entry.getKey() + " " + entry.getValue());
+			getLog().append("\n" + ("Problem: " + entry.getKey() + " " + entry.getValue()));
 		}
 		
 		try (BufferedWriter bw = new BufferedWriter(new FileWriter(basePath + "//log.txt"))) {

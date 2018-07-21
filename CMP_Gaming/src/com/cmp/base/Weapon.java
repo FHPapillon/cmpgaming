@@ -1,5 +1,8 @@
 package com.cmp.base;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.cmp.fragalyzer.types.WeaponType;
 
 public class Weapon {
@@ -57,5 +60,29 @@ public String toString() {
 	return "Weapon [type=" + type + ", templateName=" + templateName + ", name=" + name + ", projectile=" + projectile
 			+ ", velocity=" + velocity + ", rounds=" + rounds + ", mags=" + mags + "]";
 }
+public List<String> getWeaponOutput() {
+	List<String> ret = new ArrayList<>();
+	if(getName() != null)
+		ret.add(getName());
+	else
+		ret.add(getTemplateName());
+	
+	ret.add(getTemplateName());
+	
+	if(getType() != null)
+		ret.add(getType().name());
+	else
+		ret.add("Unknown");
+	
+	if (getProjectile() != null)
+		ret.add(getProjectile());
+	else
+		ret.add("Unknown");
+	
+	ret.add(Integer.toString(getVelocity()));
+	ret.add(Integer.toString(getMags()));
+	ret.add(Integer.toString(getRounds()));
 
+	return ret;
+}
 }
