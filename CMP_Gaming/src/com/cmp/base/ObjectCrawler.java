@@ -1067,7 +1067,7 @@ private void writeVehiclesToCSV(String basePath, String team){
 							weapon.setVelocity(getIntValueForKeyFromTweakLine("ObjectTemplate.velocity", line));
 					}
 					weapon.setType(FragalyzerConstants.weaponTypes.get(weapon.getTemplateName()));
-					weapon.setName(FragalyzerConstants.weaponNames.get(weapon.getTemplateName()));
+					weapon.setName(FragalyzerConstants.names.get(weapon.getTemplateName()));
 					if (weapon.getTemplateName() != null)
 						getWeapons().add(weapon);
 

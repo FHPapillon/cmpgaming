@@ -185,11 +185,11 @@ public  class LogEntry {
 				
 				break;		
 			case VEHICLE_INF:
-				ret = getKillType() + " " +killtext + " with " + getVehicleName(getVehicle())+ " ("  + " " + FragalyzerConstants.vehicleNames.get(getVehicle()) + "/" + getAttackerVehicleType() + " vs " +  FragalyzerConstants.kitNames.get(getVictimKitType()) +  ")"+ getTime();
+				ret = getKillType() + " " +killtext + " with " + getVehicleName(getVehicle())+ " ("  + " " + FragalyzerConstants.names.get(getVehicle()) + "/" + getAttackerVehicleType() + " vs " +  FragalyzerConstants.kitNames.get(getVictimKitType()) +  ")"+ getTime();
 				
 				break;	
 			case VEHICLE_VEHICLE:
-				ret = getKillType() + " " +killtext + " with " + getVehicleName(getVehicle())+ " (" + " " + FragalyzerConstants.vehicleNames.get(getVehicle()) + "/" + getAttackerVehicleType()  + " vs " +  FragalyzerConstants.vehicleNames.get(getVictimVehicle()) + "/" + getVictimVehicleType()  +  ")"+ getTime();
+				ret = getKillType() + " " +killtext + " with " + getVehicleName(getVehicle())+ " (" + " " + FragalyzerConstants.names.get(getVehicle()) + "/" + getAttackerVehicleType()  + " vs " +  FragalyzerConstants.names.get(getVictimVehicle()) + "/" + getVictimVehicleType()  +  ")"+ getTime();
 				
 				break;								
 			default:
@@ -207,8 +207,8 @@ public  class LogEntry {
 	}
 	
 	private String getWeaponName(String name){
-		if (FragalyzerConstants.weaponNames.containsKey(name))
-			return FragalyzerConstants.weaponNames.get(name);
+		if (FragalyzerConstants.names.containsKey(name))
+			return FragalyzerConstants.names.get(name);
 		else
 			return name;
 	}
@@ -216,8 +216,8 @@ public  class LogEntry {
 	
 	
 	private String getVehicleName(String name){
-		if (FragalyzerConstants.vehicleNames.containsKey(name))
-			return FragalyzerConstants.vehicleNames.get(name);
+		if (FragalyzerConstants.names.containsKey(name))
+			return FragalyzerConstants.names.get(name);
 		else
 			return name;
 	}

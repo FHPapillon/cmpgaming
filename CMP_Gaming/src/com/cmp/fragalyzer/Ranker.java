@@ -1031,7 +1031,7 @@ public class Ranker {
 	}
 
 	private String findTemplateNameFromHudName(String name) {
-		for (Entry<String, String> entry : FragalyzerConstants.vehicleNames.entrySet()) {
+		for (Entry<String, String> entry : FragalyzerConstants.names.entrySet()) {
 			if (Objects.equals(name, entry.getValue())) {
 				return entry.getKey();
 			}
@@ -1040,7 +1040,7 @@ public class Ranker {
 	}
 
 	private String findWeaponTemplateNameFromHudName(String name) {
-		for (Entry<String, String> entry : FragalyzerConstants.weaponNames.entrySet()) {
+		for (Entry<String, String> entry : FragalyzerConstants.names.entrySet()) {
 			if (Objects.equals(name, entry.getValue())) {
 				return entry.getKey();
 			}

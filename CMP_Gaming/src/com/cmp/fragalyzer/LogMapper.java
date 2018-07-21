@@ -31,14 +31,13 @@ public class LogMapper {
 		int tokenCounter = 0;
 		boolean relevant = true;
 		LogEntry entry = null;
-		
 
 		missingKits = in_missingKits;
 		StringTokenizer tok = new StringTokenizer(logLine, FragalyzerConstants.logDelimiter);
 		while (tok.hasMoreTokens() && relevant) {
 			token = tok.nextToken();
 			tokenCounter++;
-			
+
 			switch (tokenCounter) {
 			case 1:
 				if (token.equals(FragalyzerConstants.KILL)) {
@@ -66,10 +65,10 @@ public class LogMapper {
 			default:
 				break;
 			}
-			
+
 		}
 		if (entry != null) {
-			if(entry.toString().contains("null")) {
+			if (entry.toString().contains("null")) {
 				System.out.println("IN:  " + logLine);
 				System.out.println("OUT: " + entry.toString());
 			}
@@ -157,7 +156,7 @@ public class LogMapper {
 			if (!(round.getDatetime().equals(datetime))) {
 				roundCount++;
 				mapname = round.getMapname();
-				datetime = round.getDatetime();				
+				datetime = round.getDatetime();
 			}
 		} else {
 			mapname = round.getMapname();
@@ -233,7 +232,7 @@ public class LogMapper {
 					break;
 				case (FragalyzerConstants.Time):
 					kill.setTime(logValue);
-					break;					
+					break;
 				default:
 					break;
 				}
@@ -274,10 +273,10 @@ public class LogMapper {
 				case (FragalyzerConstants.PlayerName):
 					score.setPlayer(logValue);
 					break;
-					
+
 				case (FragalyzerConstants.Time):
 					score.setTime(logValue);
-					break;					
+					break;
 
 				case (FragalyzerConstants.Scoretype):
 					switch (logValue) {
@@ -286,19 +285,19 @@ public class LogMapper {
 						break;
 					case FragalyzerConstants.cpCaptures:
 						score.setCpEvent(CPEvents.cpCaptures);
-						break;						
+						break;
 					case FragalyzerConstants.cpDefends:
 						score.setCpEvent(CPEvents.cpDefends);
-						break;						
+						break;
 					case FragalyzerConstants.cpNeutralizeAssists:
 						score.setCpEvent(CPEvents.cpNeutralizeAssists);
-						break;						
+						break;
 					case FragalyzerConstants.cpNeutralizes:
 						score.setCpEvent(CPEvents.cpNeutralizes);
 						break;
 
 					default:
-						//others are not of interest
+						// others are not of interest
 						break;
 					}
 
@@ -343,18 +342,18 @@ public class LogMapper {
 			else
 				missingKits.put("w: " + kill.getWeapon(), "");
 
-			if (FragalyzerConstants.weaponNames.containsKey(kill.getWeapon()))
-				kill.setWeaponName((FragalyzerConstants.weaponNames.get(kill.getWeapon())));
+			if (FragalyzerConstants.names.containsKey(kill.getWeapon()))
+				kill.setWeaponName((FragalyzerConstants.names.get(kill.getWeapon())));
 			else
 				missingKits.put("w: " + kill.getWeapon(), "");
 
-			if (FragalyzerConstants.vehicleNames.containsKey(kill.getVehicle()))
-				kill.setAttackerVehicleName(FragalyzerConstants.vehicleNames.get(kill.getVehicle()));
-			else if (FragalyzerConstants.weaponNames.containsKey(kill.getWeapon()))
-				kill.setAttackerVehicleName(FragalyzerConstants.weaponNames.get(kill.getVehicle()));
+			if (FragalyzerConstants.names.containsKey(kill.getVehicle()))
+				kill.setAttackerVehicleName(FragalyzerConstants.names.get(kill.getVehicle()));
+					
+			
 
-			if (FragalyzerConstants.vehicleNames.containsKey(kill.getVictimVehicle()))
-				kill.setVictimVehicleName(FragalyzerConstants.vehicleNames.get(kill.getVictimVehicle()));
+			if (FragalyzerConstants.names.containsKey(kill.getVictimVehicle()))
+				kill.setVictimVehicleName(FragalyzerConstants.names.get(kill.getVictimVehicle()));
 			else
 				missingKits.put("w: " + kill.getVictimVehicle(), "");
 
@@ -362,7 +361,6 @@ public class LogMapper {
 
 		default:
 
-		
 			break;
 		}
 		return kill;
@@ -405,24 +403,41 @@ public class LogMapper {
 		}
 
 		boolean attackerIsInf = false;
-		if (kill.getVehicle() != null) {
+		if (kill.getVehicle() != null && !kill.getVehicle().equals("")) {
 			String attackerVehicle = kill.getVehicle().toLowerCase().substring(0, 3);
-			attackerIsInf = isInfantry(attackerVehicle);
-		}
-		else	
+			// Check if the Vehicle is contained in the vehicle list and that it
+			// is not a deployed mortar
+			if (FragalyzerConstants.vehicleTypes.containsKey(kill.getVehicle().toLowerCase())
+					&& !(kill.getVehicle().toLowerCase().contains("deployed"))
+					&& !(kill.getVehicle().toLowerCase().contains("gun"))
+					&& !(kill.getVehicle().toLowerCase().contains("cannon"))
+					&& !(kill.getVehicle().toLowerCase().contains("barrel"))
+					)
+				attackerIsInf = false;
+			// if it's a deployed mortar of the vehicle is actually a kit, it's infantry
+			else if (kill.getVehicle().toLowerCase().contains("deployed") || isInfantry(attackerVehicle))
+				attackerIsInf = true;
+			//swap weapon and vehicle if we have a mortar kill
+			if (kill.getVehicle().toLowerCase().contains("deployed")) {
+				kill.setWeapon(kill.getVehicle());
+				kill.setVehicle(new String());
+			}
+		} else
 			attackerIsInf = true;
+		
+		
+		
 		boolean victimIsInf = false;
 		if (kill.getVictimVehicle() != null) {
 			String victimVehicle = kill.getVictimVehicle().toLowerCase().substring(0, 3);
 			victimIsInf = isInfantry(victimVehicle);
-		}
-		else
+		} else
 			victimIsInf = true;
 
 		if (attackerIsInf && victimIsInf)
 			kill.setKillType(KillType.INF_INF);
 
-		if (attackerIsInf && !victimIsInf){
+		if (attackerIsInf && !victimIsInf) {
 			if (!kill.getVictimVehicle().equals("laddercontainer"))
 				kill.setKillType(KillType.INF_VEHICLE);
 			else
@@ -436,23 +451,23 @@ public class LogMapper {
 			if (!kill.getVictimVehicle().equals("laddercontainer"))
 				kill.setKillType(KillType.VEHICLE_VEHICLE);
 			else
-				kill.setKillType(KillType.VEHICLE_INF);			
-			//kill.setKillType(KillType.VEHICLE_VEHICLE);
+				kill.setKillType(KillType.VEHICLE_INF);
+		// kill.setKillType(KillType.VEHICLE_VEHICLE);
 
 		if (kill.getPlayerTeam().equals(kill.getVictimTeam()))
 			kill.setTeamkill(true);
 		else
 			kill.setTeamkill(false);
-		
-		if (kill.getKillType().equals(KillType.INF_INF) || kill.getKillType().equals(KillType.INF_VEHICLE)){
+
+		if (kill.getKillType().equals(KillType.INF_INF) || kill.getKillType().equals(KillType.INF_VEHICLE)) {
 			if (kill.getWeapon() == null)
 				kill.setWeapon("Unknown");
 			if (kill.getPlayerKit() == null) {
 				kill.setPlayerKit("Unknown");
 			}
-				
+
 		}
-		
+
 		return kill;
 	}
 
